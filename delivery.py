@@ -32,14 +32,25 @@ destination_city = st.selectbox(
 
 geolocator = Nominatim(user_agent="delivery_app")
 
-source_location = geolocator.geocode(source_city)
-destination_location = geolocator.geocode(destination_city)
+try:
+    source_location = geolocator.geocode(source_city, timeout=10)
+    destination_location = geolocator.geocode(destination_city, timeout=10)
 
-src_lat = source_location.latitude
-src_lon = source_location.longitude
+    if source_location and destination_location:
 
-dest_lat = destination_location.latitude
-dest_lon = destination_location.longitude
+        src_lat = source_location.latitude
+        src_lon = source_location.longitude
+
+        dest_lat = destination_location.latitude
+        dest_lon = destination_location.longitude
+
+    else:
+        st.error("Could not fetch location coordinates.")
+        st.stop()
+
+except Exception:
+    st.error("Geocoding service unavailable. Please try again later.")
+    st.stop()
 
 # OSRM FUNCTION
 def get_osrm_data(src_lat, src_lon, dest_lat, dest_lon):
