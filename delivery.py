@@ -108,6 +108,30 @@ route_freq_map = data.groupby('route')['route'].count().to_dict()
 
 route_frequency = route_freq_map.get(route, 0)
 
+def traffic_level(hour):
+
+    # Low Traffic Hours
+    if hour in [0,1,2,3,4,7,23]:
+        return "Low"
+
+    # High Traffic Hours
+    elif hour in [10,11,12,13,14,17]:
+        return "High"
+
+    # Medium Traffic Hours
+    else:
+        return "Medium"
+
+
+data['traffic_level'] = data['od_hour'].apply(traffic_level)
+traffic_map = {
+    "Low": 0,
+    "Medium": 1,
+    "High": 2
+}
+
+data['traffic_level'] = data['traffic_level'].map(traffic_map)
+
 if st.button("Predict Delivery Time"):   
     input_data = pd.DataFrame({
         'source_center': [source_center],
@@ -117,7 +141,8 @@ if st.button("Predict Delivery Time"):
         'osrm_distance': [osrm_distance],
         'trip_hour': [trip_hour],
         'od_hour': [od_hour],
-        'route_frequency': [route_frequency]
+        'route_frequency': [route_frequency],
+        'traffic_level': [traffic_map[traffic_level(od_hour)]]
     })
     
     prediction = pipe.predict(input_data)[0]
