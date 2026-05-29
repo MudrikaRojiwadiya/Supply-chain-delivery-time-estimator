@@ -79,20 +79,31 @@ except Exception:
     st.error("Geocoding service unavailable. Please try again later.")
     st.stop()
 
-# OSRM FUNCTION
 def get_osrm_data(src_lat, src_lon, dest_lat, dest_lon):
 
-    url = f"http://router.project-osrm.org/route/v1/driving/{src_lon},{src_lat};{dest_lon},{dest_lat}?overview=false"
+    try:
+        url = f"http://router.project-osrm.org/route/v1/driving/{src_lon},{src_lat};{dest_lon},{dest_lat}?overview=false"
 
-    response = requests.get(url)
+        response = requests.get(url, timeout=10)
 
-    data = response.json()
+        if response.status_code != 200:
+            st.error("Unable to fetch route information. Please try again later.")
+            return None, None
 
-    distance = data['routes'][0]['distance'] / 1000   # KM
-    duration = data['routes'][0]['duration'] / 60     # Minutes
+        data = response.json()
 
-    return distance, duration
+        if not data.get("routes"):
+            st.error("No route information available for the selected locations.")
+            return None, None
 
+        distance = data['routes'][0]['distance'] / 1000
+        duration = data['routes'][0]['duration'] / 60
+
+        return distance, duration
+
+    except Exception:
+        st.error("Route service is currently unavailable. Please try again later.")
+        return None
 
 # GET OSRM DISTANCE AND TIME
 osrm_distance, osrm_time = get_osrm_data(
@@ -101,6 +112,8 @@ osrm_distance, osrm_time = get_osrm_data(
     dest_lat,
     dest_lon
 )
+if osrm_distance is None:
+    st.stop()
 
 # SHOW OUTPUT
 col3, col4 = st.columns(2)
