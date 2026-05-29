@@ -1,6 +1,5 @@
 import streamlit as st
 import pickle
-from geopy.geocoders import Nominatim
 import requests
 import pandas as pd
 import numpy as np
@@ -57,40 +56,59 @@ with col2:
         "🎯 Select Destination City",
         data['destination_city'].unique()
     )
-geolocator = Nominatim(
-    user_agent="ShipmentDeliveryPredictor/1.0"
-)
+
+API_KEY = "d16637d0e41943d78a49d715ad36f925"
+def get_coordinates(city):
+
+    url = (
+        f"https://api.opencagedata.com/geocode/v1/json"
+        f"?q={city},India&key={API_KEY}"
+    )
+
+    response = requests.get(url, timeout=20)
+
+    if response.status_code != 200:
+        return None
+
+    result = response.json()
+
+    if len(result["results"]) == 0:
+        return None
+
+    lat = result["results"][0]["geometry"]["lat"]
+    lon = result["results"][0]["geometry"]["lng"]
+
+    return lat, lon
 
 try:
-    source_location = geolocator.geocode(source_city, timeout=10)
-    destination_location = geolocator.geocode(destination_city, timeout=10)
 
-    if source_location and destination_location:
+    source_coords = get_coordinates(source_city)
+    destination_coords = get_coordinates(destination_city)
 
-        src_lat = source_location.latitude
-        src_lon = source_location.longitude
+    if source_coords and destination_coords:
 
-        dest_lat = destination_location.latitude
-        dest_lon = destination_location.longitude
+        src_lat, src_lon = source_coords
+        dest_lat, dest_lon = destination_coords
 
     else:
-        st.error("Could not fetch location coordinates.")
+        st.error("Coordinates not found")
         st.stop()
 
 except Exception as e:
-    st.error(f"Actual error fetching coordinates: {e}")
+
+    st.error(f"Error: {e}")
     st.stop()
 
 def get_osrm_data(src_lat, src_lon, dest_lat, dest_lon):
 
     try:
-        url = f"http://router.project-osrm.org/route/v1/driving/{src_lon},{src_lat};{dest_lon},{dest_lat}?overview=false"
+        url = f"https://router.project-osrm.org/route/v1/driving/{src_lon},{src_lat};{dest_lon},{dest_lat}?overview=false"
 
         response = requests.get(url, timeout=10)
 
         if response.status_code != 200:
             st.error("Unable to fetch route information. Please try again later.")
-            return None
+            return None , None
 
         data = response.json()
 
