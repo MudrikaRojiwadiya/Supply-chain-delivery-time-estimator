@@ -88,7 +88,7 @@ def get_osrm_data(src_lat, src_lon, dest_lat, dest_lon):
 
         if response.status_code != 200:
             st.error("Unable to fetch route information. Please try again later.")
-            return None, None
+            return None
 
         data = response.json()
 
