@@ -75,8 +75,8 @@ try:
         st.error("Could not fetch location coordinates.")
         st.stop()
 
-except Exception:
-    st.error("Geocoding service unavailable. Please try again later.")
+except Exception as e:
+    st.error(f"Actual error fetching coordinates: {e}")
     st.stop()
 
 def get_osrm_data(src_lat, src_lon, dest_lat, dest_lon):
