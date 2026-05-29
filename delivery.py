@@ -57,7 +57,9 @@ with col2:
         "🎯 Select Destination City",
         data['destination_city'].unique()
     )
-geolocator = Nominatim(user_agent="delivery_app")
+geolocator = Nominatim(
+    user_agent="ShipmentDeliveryPredictor/1.0"
+)
 
 try:
     source_location = geolocator.geocode(source_city, timeout=10)
