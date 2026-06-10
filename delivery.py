@@ -38,6 +38,10 @@ shipment delivery arrival using:
 ✔ OSRM Routing
 ✔ Streamlit
 ✔ Geopy
+                
+📌 Delivery time refers only to
+warehouse-to-warehouse transit and
+does not include home delivery.
 """)
 
 route_type = st.selectbox("Select route_type", data["route_type"].unique())
@@ -273,6 +277,11 @@ if st.button("🚀 Predict Delivery Time", use_container_width=True):
     <p style="font-size:18px; color:#424242;">
     There is a <b>{confidence}% probability</b> that your shipment
     will arrive by the estimated time.
+    </p>
+
+    <p style="font-size:14px; color:#616161;">
+    📌 Note:
+    Estimated delivery time covers shipment movement between logistics centers/warehouses only.
     </p>
 
     </div>
